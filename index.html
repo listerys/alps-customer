@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alphoris AI - Voice scheduling for modern healthcare</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --accent: #E54D2E;
+      --dark: #0C0C0C;
+      --muted: #737373;
+      --border: #E5E5E5;
+      --bg-light: #FAFAFA;
+    }
+
+    ::selection {
+      background: var(--accent);
+      color: white;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #FFFFFF;
+      min-height: 100vh;
+      color: var(--dark);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background:
+        radial-gradient(circle at 15% 25%, rgba(229, 77, 46, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(16, 185, 129, 0.10) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(255, 165, 0, 0.06) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(255, 200, 150, 0.03), rgba(200, 255, 200, 0.03));
+      backdrop-filter: blur(120px) saturate(150%);
+      -webkit-backdrop-filter: blur(120px) saturate(150%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: -50%;
+      left: -50%;
+      right: -50%;
+      bottom: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' seed='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.35;
+      mix-blend-mode: multiply;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes dash {
+      to { stroke-dashoffset: 0; }
+    }
+
+
+    @keyframes messageIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes typing {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes soundWave {
+      0%, 100% { height: 4px; }
+      50% { height: 20px; }
+    }
+
+    @keyframes ringPulse {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 0.4; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+
+    @keyframes checkDraw {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .glass-matte {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(32px) saturate(180%) brightness(105%);
+      -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(105%);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+
+    .glass-subtle {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(16px) saturate(120%);
+      -webkit-backdrop-filter: blur(16px) saturate(120%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow:
+        0 4px 24px rgba(0, 0, 0, 0.03),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .glass-dark {
+      background: rgba(12, 12, 12, 0.85);
+      backdrop-filter: blur(24px) saturate(120%);
+      -webkit-backdrop-filter: blur(24px) saturate(120%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    /* Background */
+    .background-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, rgba(255, 245, 240, 0.4) 0%, rgba(240, 255, 245, 0.4) 100%),
+        radial-gradient(ellipse at top left, rgba(255, 200, 150, 0.15), transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(180, 255, 200, 0.15), transparent 50%),
+        linear-gradient(to bottom, rgba(250, 250, 250, 0.9), rgba(245, 245, 245, 0.95));
+    }
+
+    .gradient-orb {
+      position: absolute;
+      transition: transform 0.5s ease-out;
+    }
+
+    .gradient-orb-1 {
+      top: 5%;
+      right: 10%;
+      width: 650px;
+      height: 650px;
+      background: radial-gradient(circle, rgba(255, 140, 60, 0.18) 0%, rgba(229, 77, 46, 0.08) 40%, transparent 70%);
+      filter: blur(40px);
+    }
+
+    .gradient-orb-2 {
+      top: 40%;
+      left: 5%;
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(100, 220, 160, 0.15) 0%, rgba(16, 185, 129, 0.08) 40%, transparent 70%);
+      filter: blur(40px);
+    }
+
+    .gradient-orb-3 {
+      bottom: 10%;
+      right: 30%;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(255, 180, 100, 0.12) 0%, rgba(229, 150, 46, 0.06) 40%, transparent 70%);
+      filter: blur(40px);
+    }
+
+    .dot-pattern {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px);
+      background-size: 24px 24px;
+      opacity: 0.3;
+      mix-blend-mode: multiply;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      transition: all 0.4s ease;
+    }
+
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.4s ease;
+    }
+
+    .nav-container.scrolled {
+      margin: 12px auto;
+      border-radius: 100px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--dark);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .logo-text {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: var(--dark);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 36px;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--dark);
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background: var(--dark);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+    }
+
+    .btn:hover {
+      opacity: 0.85;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 48px 60px;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 100px;
+      align-items: center;
+      width: 100%;
+    }
+
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .fade-in.loaded {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .announcement {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 6px 6px 14px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.98), rgba(250,250,250,0.95)),
+        repeating-linear-gradient(90deg, transparent, transparent 1px, rgba(0,0,0,0.008) 1px, rgba(0,0,0,0.008) 2px);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      margin-bottom: 32px;
+      box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22C55E;
+    }
+
+    .hero-title {
+      font-size: clamp(44px, 5.5vw, 68px);
+      font-weight: 600;
+      line-height: 1.08;
+      letter-spacing: -2.5px;
+      margin-bottom: 28px;
+      color: var(--dark);
+    }
+
+    .italic-text {
+      font-family: 'Instrument Serif', Georgia, serif;
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    .hero-description {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 440px;
+      margin-bottom: 40px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 64px;
+    }
+
+    .btn-primary {
+      padding: 14px 28px;
+      background: var(--dark);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-secondary {
+      padding: 14px 28px;
+      background: white;
+      color: var(--dark);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stats-row {
+      display: flex;
+      gap: 48px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -1px;
+      color: var(--dark);
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Phone Mockup */
+    .phone-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 580px;
+    }
+
+    .phone-frame {
+      position: relative;
+      width: 280px;
+      height: 560px;
+      background: #000;
+      border-radius: 44px;
+      padding: 12px;
+      transition: transform 0.4s ease-out;
+    }
+
+    .phone-screen {
+      width: 100%;
+      height: 100%;
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,1), rgba(252,252,252,1)),
+        repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,0,0,0.006) 1px, rgba(0,0,0,0.006) 2px);
+      border-radius: 36px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .phone-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='phoneNoise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23phoneNoise)' opacity='0.012'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .status-bar {
+      padding: 14px 24px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    .notch {
+      width: 80px;
+      height: 28px;
+      background: #000;
+      border-radius: 20px;
+    }
+
+    .app-header {
+      padding: 8px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .app-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--dark);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-area {
+      padding: 16px;
+      height: 340px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      display: flex;
+      animation: messageIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message-bubble {
+      max-width: 85%;
+      padding: 12px 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .message-bubble.user {
+      border-radius: 16px 16px 4px 16px;
+      background: var(--dark);
+      color: white;
+    }
+
+    .message-bubble.ai {
+      border-radius: 16px 16px 16px 4px;
+      background: var(--bg-light);
+      color: var(--dark);
+    }
+
+    .typing-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 12px;
+      margin-left: 2px;
+      animation: typing 0.8s ease infinite;
+    }
+
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 12px 14px;
+      background: var(--bg-light);
+      border-radius: 16px;
+      width: fit-content;
+      animation: messageIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+      animation: typing 1s ease infinite;
+    }
+
+    .voice-input {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 16px;
+      background: white;
+      border-top: 1px solid var(--border);
+    }
+
+    .sound-wave {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 32px;
+      margin-bottom: 12px;
+    }
+
+    .sound-bar {
+      width: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      transition: background 0.3s ease;
+      height: 4px;
+    }
+
+    .sound-bar.active {
+      background: var(--accent);
+      animation: soundWave 0.6s ease-in-out infinite;
+    }
+
+    .floating-badge {
+      position: absolute;
+      padding: 14px 18px;
+      border-radius: 14px;
+      animation: float 4s ease-in-out infinite;
+      transition: transform 0.4s ease-out;
+    }
+
+    .decorative-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 400px;
+      height: 400px;
+      border: 1px dashed var(--border);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0.5;
+      animation: rotate 60s linear infinite;
+    }
+
+    /* Features Section */
+    .features-section {
+      padding: 140px 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 100px;
+      align-items: start;
+    }
+
+    .sticky-header {
+      position: sticky;
+      top: 140px;
+    }
+
+    .feature-helper-text {
+      position: relative;
+      margin-top: 100px;
+      height: 220px;
+      overflow: visible;
+    }
+
+    .helper-text-item {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-size: clamp(42px, 5.5vw, 68px);
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -2px;
+      color: rgba(12, 12, 12, 0.55);
+      opacity: 0;
+      transform: translateZ(-100px) scale(0.9);
+      transition: opacity 0.08s ease, transform 0.08s ease;
+      pointer-events: none;
+      max-width: 100%;
+      word-wrap: break-word;
+      white-space: normal;
+      will-change: transform, opacity;
+    }
+
+    .helper-text-item.active {
+      opacity: 1;
+      transform: translateZ(0) scale(1);
+    }
+
+    .helper-text-item.exiting {
+      opacity: 0;
+      transform: translateZ(100px) scale(1.1);
+      transition: opacity 0.05s ease, transform 0.05s ease;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .section-title {
+      font-size: 40px;
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -1.5px;
+      margin-bottom: 20px;
+      color: var(--dark);
+    }
+
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .feature-card {
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(252,252,252,0.98)),
+        repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(0,0,0,0.005) 1px, rgba(0,0,0,0.005) 2px);
+      padding: 36px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.015'/%3E%3C/svg%3E");
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-light);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+
+    .feature-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      font-family: monospace;
+      transition: color 0.3s ease;
+      margin-top: 4px;
+    }
+
+    .feature-card:hover .feature-num {
+      color: var(--accent);
+    }
+
+    .feature-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--dark);
+      letter-spacing: -0.3px;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .feature-arrow {
+      font-size: 18px;
+      color: var(--border);
+      transition: color 0.3s ease;
+    }
+
+    .feature-card:hover .feature-arrow {
+      color: var(--accent);
+    }
+
+    /* How It Works */
+    .how-it-works {
+      background: var(--bg-light);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 1;
+      padding: 140px 48px;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .step-card {
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(252,252,252,0.98)),
+        repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(0,0,0,0.005) 1px, rgba(0,0,0,0.005) 2px);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: border-color 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise2'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise2)' opacity='0.02'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .step-card.active {
+      border-color: var(--dark);
+    }
+
+    .step-num {
+      font-size: 42px;
+      font-weight: 300;
+      color: var(--border);
+      font-family: monospace;
+      margin-bottom: 20px;
+      transition: color 0.4s ease;
+    }
+
+    .step-card.active .step-num {
+      color: var(--accent);
+    }
+
+    .progress-bar {
+      margin-top: 40px;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--dark);
+      transition: width 0.4s ease;
+    }
+
+    /* Testimonials */
+    .testimonials-section {
+      padding: 140px 48px;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .testimonial-card {
+      background:
+        linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(252,252,252,0.98)),
+        repeating-linear-gradient(45deg, transparent, transparent 1px, rgba(0,0,0,0.005) 1px, rgba(0,0,0,0.005) 2px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px;
+      transition: background 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .testimonial-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise3'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise3)' opacity='0.018'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+
+    .testimonial-card:hover {
+      background: var(--bg-light);
+    }
+
+    .quote-mark {
+      font-size: 40px;
+      font-family: 'Instrument Serif', Georgia, serif;
+      color: var(--border);
+      line-height: 1;
+      margin-bottom: 12px;
+      transition: color 0.3s ease;
+    }
+
+    .testimonial-card:hover .quote-mark {
+      color: var(--accent);
+    }
+
+    .testimonial-text {
+      font-size: 15px;
+      color: var(--dark);
+      line-height: 1.7;
+      flex: 1;
+      margin-bottom: 28px;
+    }
+
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .author-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--bg-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    /* CTA Section */
+    .cta-section {
+      padding: 0 48px 140px;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-box {
+      background: var(--dark);
+      border-radius: 24px;
+      padding: 80px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-number {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 11px;
+      font-family: monospace;
+      color: rgba(255,255,255,0.2);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 64px 48px 40px;
+      background: white;
+      position: relative;
+      z-index: 1;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+      margin-bottom: 64px;
+      max-width: 1400px;
+      margin: 0 auto 64px;
+    }
+
+    .footer-links {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .footer-link {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 10px;
+      transition: color 0.2s ease;
+    }
+
+    .footer-link:hover {
+      color: var(--dark);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .center-text {
+      text-align: center;
+      margin-bottom: 72px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div class="background-container">
+    <div class="gradient-orb gradient-orb-1" id="orb1"></div>
+    <div class="gradient-orb gradient-orb-2" id="orb2"></div>
+    <div class="gradient-orb gradient-orb-3" id="orb3"></div>
+    <div class="dot-pattern"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-container" id="navContainer">
+      <div class="logo">
+        <img src="logo.png" alt="Alphoris AI Logo" style="height: 32px; width: auto; object-fit: contain;">
+        <span class="logo-text">Alphoris AI</span>
+      </div>
+
+      <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how-it-works" class="nav-link">How It Works</a>
+        <a href="#testimonials" class="nav-link">Testimonials</a>
+        <a href="#pricing" class="nav-link">Pricing</a>
+        <button class="btn">Get Started</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="heroSection">
+    <div class="hero-grid">
+      <!-- Left Content -->
+      <div>
+        <div class="announcement fade-in" style="transition-delay: 0.1s">
+          <span class="status-dot"></span>
+          <span style="font-size: 13px; font-weight: 500; color: var(--muted)">Live in Beta</span>
+          <span style="font-size: 12px; font-weight: 500; color: var(--dark); background: var(--bg-light); padding: 4px 10px; border-radius: 100px">Request Access →</span>
+        </div>
+
+        <h1 class="hero-title fade-in" style="transition-delay: 0.2s">
+          Voice scheduling<br>
+          <span class="italic-text">for modern</span> healthcare
+        </h1>
+
+        <p class="hero-description fade-in" style="transition-delay: 0.3s">
+          AI-powered appointment booking that speaks your patients' language.
+          Reduce no-shows by 60% and serve patients 24/7.
+        </p>
+
+        <div class="cta-buttons fade-in" style="transition-delay: 0.4s">
+          <button class="btn-primary">
+            Start Free Trial
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </button>
+          <a href="mailto:achoudhury@alphoris.com?subject=Request%20Demo%20-%20Alphoris%20AI" class="btn-secondary" style="text-decoration: none; display: flex; align-items: center; gap: 8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5,3 19,12 5,21"/>
+            </svg>
+            Request Demo
+          </a>
+        </div>
+
+        <div class="stats-row fade-in" style="transition-delay: 0.5s">
+          <div>
+            <div class="stat-value">15+</div>
+            <div class="stat-label">Early Adopters</div>
+          </div>
+          <div>
+            <div class="stat-value">24/7</div>
+            <div class="stat-label">Available</div>
+          </div>
+          <div>
+            <div class="stat-value">60%</div>
+            <div class="stat-label">Less No-Shows</div>
+          </div>
+          <div>
+            <div class="stat-value">12+</div>
+            <div class="stat-label">Languages</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right - Phone Mockup -->
+      <div class="phone-container fade-in" style="transition-delay: 0.4s">
+        <div class="phone-frame" id="phoneFrame">
+          <div class="phone-screen">
+            <!-- Status Bar -->
+            <div class="status-bar">
+              <span>9:41</span>
+              <div class="notch"></div>
+              <div style="display: flex; gap: 4px; align-items: center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--dark)">
+                  <path d="M12 3C7.46 3 3.34 4.78.29 7.67c-.18.18-.29.43-.29.71 0 .28.11.53.29.71l2.48 2.48c.18.18.43.29.71.29.27 0 .52-.11.7-.28.79-.74 1.69-1.36 2.66-1.85.33-.16.56-.5.56-.9v-3.1c1.45-.48 3-.73 4.6-.73s3.15.25 4.6.73v3.1c0 .4.23.74.56.9.98.49 1.87 1.12 2.67 1.85.18.18.43.28.7.28.28 0 .53-.11.71-.29l2.48-2.48c.18-.18.29-.43.29-.71 0-.28-.11-.53-.29-.71C20.66 4.78 16.54 3 12 3z"/>
+                </svg>
+                <svg width="20" height="12" viewBox="0 0 24 12">
+                  <rect x="0" y="0" width="22" height="12" rx="3" stroke="var(--dark)" stroke-width="1" fill="none"/>
+                  <rect x="2" y="2" width="18" height="8" rx="1.5" fill="var(--dark)"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- App Header -->
+            <div class="app-header">
+              <div class="app-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                </svg>
+              </div>
+              <div>
+                <div style="font-size: 14px; font-weight: 600; color: var(--dark)">Alphoris AI</div>
+                <div style="font-size: 11px; display: flex; align-items: center; gap: 4px" id="statusText">
+                  <span style="width: 5px; height: 5px; border-radius: 50%" id="statusDot"></span>
+                  <span id="statusLabel"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Area -->
+            <div class="chat-area" id="chatArea"></div>
+
+            <!-- Voice Input Area -->
+            <div class="voice-input">
+              <div class="sound-wave" id="soundWave"></div>
+              <div style="font-size: 11px; color: var(--muted); text-align: center" id="voiceStatus">
+                Tap to speak
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating Elements -->
+        <div class="glass-subtle floating-badge" style="top: 15%; right: -10%" id="successBadge">
+          <div style="display: flex; align-items: center; gap: 10px">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(34, 197, 94, 0.1); display: flex; align-items: center; justify-content: center">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3">
+                <path d="M20 6L9 17l-5-5" style="stroke-dasharray: 24; stroke-dashoffset: 24; animation: checkDraw 0.5s ease forwards 0.5s"/>
+              </svg>
+            </div>
+            <div>
+              <div style="font-size: 12px; font-weight: 600; color: var(--dark)">Confirmed</div>
+              <div style="font-size: 10px; color: var(--muted)">Tomorrow 10:30 AM</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-subtle floating-badge" style="top: 8%; left: -5%; animation-delay: 0.5s" id="languagesBadge">
+          <div style="font-size: 10px; color: var(--muted); margin-bottom: 8px; font-weight: 500">LANGUAGES</div>
+          <div style="display: flex; gap: 6px">
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: var(--dark); color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600">हिं</div>
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(0,0,0,0.04); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600">த</div>
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(0,0,0,0.04); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600">తె</div>
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(0,0,0,0.04); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600">বা</div>
+            <div style="width: 28px; height: 28px; border-radius: 8px; background: rgba(0,0,0,0.04); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600">मरा</div>
+          </div>
+        </div>
+
+        <div class="glass-subtle floating-badge" style="bottom: 10%; left: -15%; animation-delay: 1s; border-radius: 100px" id="statsPill">
+          <div style="display: flex; align-items: center; gap: 8px">
+            <div style="width: 8px; height: 8px; border-radius: 50%; background: #22C55E"></div>
+            <span style="font-size: 12px; font-weight: 600; color: var(--dark)">2,847</span>
+            <span style="font-size: 11px; color: var(--muted)">today</span>
+          </div>
+        </div>
+
+        <div class="glass-subtle floating-badge" style="bottom: 25%; right: -5%; animation-delay: 1.5s" id="timeBadge">
+          <div style="font-size: 10px; color: var(--muted); margin-bottom: 4px">Avg. Call Time</div>
+          <div style="font-size: 18px; font-weight: 600; color: var(--dark)">47<span style="font-size: 12px; color: var(--muted)">s</span></div>
+        </div>
+
+        <div class="decorative-ring"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="features-grid">
+      <div class="sticky-header">
+        <span class="section-label">Features</span>
+        <h2 class="section-title">
+          Everything you need to
+          <span class="italic-text" style="display: block">transform scheduling</span>
+        </h2>
+        <p style="font-size: 15px; line-height: 1.7; color: var(--muted); max-width: 320px">
+          Our AI voice assistant handles complex scheduling with human-like understanding.
+        </p>
+
+        <!-- Dynamic Helper Text -->
+        <div class="feature-helper-text" id="featureHelperText">
+          <div class="helper-text-item active" data-feature="0">Understand your patient</div>
+          <div class="helper-text-item" data-feature="1">Speak their language</div>
+          <div class="helper-text-item" data-feature="2">Never miss an appointment</div>
+          <div class="helper-text-item" data-feature="3">Seamlessly integrated</div>
+        </div>
+      </div>
+
+      <div class="features-list">
+        <div class="feature-card" style="padding: 0; overflow: hidden">
+          <div class="feature-content" style="padding: 36px; flex-direction: column; gap: 24px">
+            <div style="display: flex; align-items: flex-start; gap: 20px; width: 100%">
+              <span class="feature-num">01</span>
+              <div style="flex: 1">
+                <h3 class="feature-title">AI Intent Recognition</h3>
+                <p class="feature-desc">Advanced NLP understands patient intent in real-time, accurately interpreting appointment requests across languages and dialects.</p>
+              </div>
+              <span class="feature-arrow">→</span>
+            </div>
+            <div style="width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05)">
+              <img
+                src="Intent Recognition.png"
+                alt="AI Intent Recognition Dashboard"
+                style="width: 100%; height: auto; display: block"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="feature-card" style="padding: 0; overflow: hidden">
+          <div class="feature-content" style="padding: 36px; flex-direction: column; gap: 24px">
+            <div style="display: flex; align-items: flex-start; gap: 20px; width: 100%">
+              <span class="feature-num">02</span>
+              <div style="flex: 1">
+                <h3 class="feature-title">12+ Indian Languages</h3>
+                <p class="feature-desc">Hindi, Tamil, Telugu, Bengali, Marathi and regional dialects supported natively.</p>
+              </div>
+              <span class="feature-arrow">→</span>
+            </div>
+            <div style="width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05)">
+              <img
+                src="Languages.png"
+                alt="Multi-Language Support Dashboard"
+                style="width: 100%; height: auto; display: block"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="feature-card" style="padding: 0; overflow: hidden">
+          <div class="feature-content" style="padding: 36px; flex-direction: column; gap: 24px">
+            <div style="display: flex; align-items: flex-start; gap: 20px; width: 100%">
+              <span class="feature-num">03</span>
+              <div style="flex: 1">
+                <h3 class="feature-title">Smart Reminders</h3>
+                <p class="feature-desc">Automated voice and SMS reminders that reduce no-shows by 60%.</p>
+              </div>
+              <span class="feature-arrow">→</span>
+            </div>
+            <div style="width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05)">
+              <img
+                src="Smart Reminders.png"
+                alt="Smart Reminders Dashboard"
+                style="width: 100%; height: auto; display: block"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="feature-card" style="padding: 0; overflow: hidden">
+          <div class="feature-content" style="padding: 36px; flex-direction: column; gap: 24px">
+            <div style="display: flex; align-items: flex-start; gap: 20px; width: 100%">
+              <span class="feature-num">04</span>
+              <div style="flex: 1">
+                <h3 class="feature-title">HMS Integration</h3>
+                <p class="feature-desc">Works seamlessly with Practo, Lybrate, and 20+ healthcare platforms.</p>
+              </div>
+              <span class="feature-arrow">→</span>
+            </div>
+            <div style="width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.05)">
+              <img
+                src="HSM Integration.png"
+                alt="HSM Integration Dashboard"
+                style="width: 100%; height: auto; display: block"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works">
+    <div style="max-width: 1400px; margin: 0 auto">
+      <div class="center-text">
+        <span class="section-label">How It Works</span>
+        <h2 class="section-title">
+          Get started in <span class="italic-text">minutes</span>
+        </h2>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card" id="step0">
+          <div class="step-num">01</div>
+          <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--dark)">Connect</h3>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6">Integrate with your existing HMS in under 30 minutes</p>
+        </div>
+        <div class="step-card" id="step1">
+          <div class="step-num">02</div>
+          <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--dark)">Configure</h3>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6">Set schedules, languages, and appointment types</p>
+        </div>
+        <div class="step-card" id="step2">
+          <div class="step-num">03</div>
+          <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--dark)">Launch</h3>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6">Go live and start receiving AI-handled calls</p>
+        </div>
+        <div class="step-card" id="step3">
+          <div class="step-num">04</div>
+          <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 6px; color: var(--dark)">Optimize</h3>
+          <p style="font-size: 13px; color: var(--muted); line-height: 1.6">Track performance and improve continuously</p>
+        </div>
+      </div>
+
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section id="testimonials" class="testimonials-section">
+    <div class="center-text">
+      <span class="section-label">Testimonials</span>
+      <h2 class="section-title">
+        Trusted by <span class="italic-text">healthcare leaders</span>
+      </h2>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <span class="quote-mark">"</span>
+        <p class="testimonial-text">Alphoris AI has transformed our patient experience. Our staff now focuses on care instead of answering phones.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">DRK</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--dark)">Dr. Rajesh Kulkarni</div>
+            <div style="font-size: 12px; color: var(--muted)">Kulkarni Multi-Specialty Clinic, Pune</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <span class="quote-mark">"</span>
+        <p class="testimonial-text">We reduced no-shows from 25% to under 10% within two months. The ROI was clear from week one.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">PS</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--dark)">Priya Sharma</div>
+            <div style="font-size: 12px; color: var(--muted)">Operations Head, MedLife Hospitals</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <span class="quote-mark">"</span>
+        <p class="testimonial-text">The Tamil language support is flawless. Our elderly patients love booking in their mother tongue.</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">DSM</div>
+          <div>
+            <div style="font-size: 13px; font-weight: 600; color: var(--dark)">Dr. Senthil Murugan</div>
+            <div style="font-size: 12px; color: var(--muted)">Apollo Partner Clinic, Chennai</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta-section">
+    <div class="cta-box">
+      <div class="cta-number">001</div>
+
+      <h2 style="font-size: clamp(32px, 4vw, 48px); font-weight: 600; line-height: 1.15; letter-spacing: -1.5px; color: white; margin-bottom: 20px">
+        Ready to transform<br>
+        <span class="italic-text">your clinic?</span>
+      </h2>
+
+      <p style="font-size: 16px; color: rgba(255,255,255,0.5); max-width: 400px; margin: 0 auto 40px; line-height: 1.7">
+        Join our early adopters program. Get exclusive beta access today.
+      </p>
+
+      <div style="display: flex; align-items: center; justify-content: center; gap: 12px">
+        <button style="padding: 14px 32px; background: white; color: var(--dark); border: none; border-radius: 100px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s ease">
+          Start Free Trial
+        </button>
+        <a href="mailto:achoudhury@alphoris.com?subject=Sales%20Inquiry%20-%20Alphoris%20AI" style="padding: 14px 32px; background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: 100px; font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color 0.2s ease; text-decoration: none; display: inline-block">
+          Talk to Sales
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // State variables
+    let scrollY = 0;
+    let activeStep = 0;
+    let mousePos = { x: 0.5, y: 0.5 };
+    let isLoaded = false;
+    let conversationStep = 0;
+    let isListening = true;
+
+    const conversationMessages = [
+      { type: 'ai', text: 'नमस्ते! Alphoris AI में आपका स्वागत है।', translation: 'Hello! Welcome to Alphoris AI.' },
+      { type: 'user', text: 'मुझे डॉक्टर शर्मा से मिलना है', translation: 'I need to see Dr. Sharma' },
+      { type: 'ai', text: 'बिल्कुल। कल सुबह 10:30 का स्लॉट उपलब्ध है।', translation: 'Sure. 10:30 AM tomorrow is available.' },
+      { type: 'user', text: 'हाँ, वो ठीक रहेगा', translation: 'Yes, that works' },
+      { type: 'ai', text: 'आपकी अपॉइंटमेंट बुक हो गई है ✓', translation: 'Your appointment is booked ✓' },
+    ];
+
+    // Initialize on load
+    setTimeout(() => {
+      isLoaded = true;
+      const fadeElements = document.querySelectorAll('.fade-in');
+      fadeElements.forEach(el => el.classList.add('loaded'));
+    }, 100);
+
+    // Scroll handler
+    window.addEventListener('scroll', () => {
+      scrollY = window.scrollY;
+      const navContainer = document.getElementById('navContainer');
+
+      if (scrollY > 50) {
+        navContainer.classList.add('glass-matte', 'scrolled');
+      } else {
+        navContainer.classList.remove('glass-matte', 'scrolled');
+      }
+    });
+
+    // Mouse move handler
+    const heroSection = document.getElementById('heroSection');
+    window.addEventListener('mousemove', (e) => {
+      if (heroSection) {
+        const rect = heroSection.getBoundingClientRect();
+        mousePos = {
+          x: (e.clientX - rect.left) / rect.width,
+          y: (e.clientY - rect.top) / rect.height
+        };
+
+        // Update gradient orbs
+        const orb1 = document.getElementById('orb1');
+        const orb2 = document.getElementById('orb2');
+        const orb3 = document.getElementById('orb3');
+
+        if (orb1) orb1.style.transform = `translate(${(mousePos.x - 0.5) * -40}px, ${(mousePos.y - 0.5) * -40}px)`;
+        if (orb2) orb2.style.transform = `translate(${(mousePos.x - 0.5) * 30}px, ${(mousePos.y - 0.5) * 30}px)`;
+        if (orb3) orb3.style.transform = `translate(${(mousePos.x - 0.5) * -20}px, ${(mousePos.y - 0.5) * 20}px)`;
+
+        // Update phone frame
+        const phoneFrame = document.getElementById('phoneFrame');
+        if (phoneFrame) {
+          phoneFrame.style.transform = `perspective(1000px) rotateY(${(mousePos.x - 0.5) * -8}deg) rotateX(${(mousePos.y - 0.5) * 5}deg)`;
+        }
+
+        // Update floating badges
+        const badges = [
+          { id: 'successBadge', x: -25, y: -20 },
+          { id: 'languagesBadge', x: 20, y: 15 },
+          { id: 'statsPill', x: 15, y: 20 },
+          { id: 'timeBadge', x: -20, y: 25 }
+        ];
+
+        badges.forEach(badge => {
+          const el = document.getElementById(badge.id);
+          if (el) {
+            el.style.transform = `translate(${(mousePos.x - 0.5) * badge.x}px, ${(mousePos.y - 0.5) * badge.y}px)`;
+          }
+        });
+      }
+    });
+
+    // Step interval for "How It Works"
+    setInterval(() => {
+      // Remove active class from all steps
+      for (let i = 0; i < 4; i++) {
+        const step = document.getElementById(`step${i}`);
+        if (step) step.classList.remove('active');
+      }
+
+      // Update active step
+      activeStep = (activeStep + 1) % 4;
+      const currentStep = document.getElementById(`step${activeStep}`);
+      if (currentStep) currentStep.classList.add('active');
+
+      // Update progress bar
+      const progressFill = document.getElementById('progressFill');
+      if (progressFill) {
+        progressFill.style.width = `${((activeStep + 1) / 4) * 100}%`;
+      }
+    }, 3000);
+
+    // Conversation animation
+    function updateChat() {
+      const chatArea = document.getElementById('chatArea');
+      if (!chatArea) return;
+
+      chatArea.innerHTML = '';
+
+      const messagesToShow = Math.min(conversationStep + 1, 5);
+      for (let i = 0; i < messagesToShow; i++) {
+        const msg = conversationMessages[i];
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${msg.type}`;
+        messageDiv.style.animationDelay = `${i * 0.1}s`;
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = `message-bubble ${msg.type}`;
+        bubbleDiv.textContent = msg.text;
+
+        // Add typing cursor to current message
+        if (i === conversationStep && i < 4) {
+          const cursor = document.createElement('span');
+          cursor.className = 'typing-cursor';
+          cursor.style.background = msg.type === 'user' ? 'white' : 'var(--dark)';
+          bubbleDiv.appendChild(cursor);
+        }
+
+        messageDiv.appendChild(bubbleDiv);
+        chatArea.appendChild(messageDiv);
+      }
+
+      // Add typing indicator at the end
+      if (conversationStep >= 5) {
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'typing-indicator';
+
+        for (let i = 0; i < 3; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'typing-dot';
+          dot.style.animationDelay = `${i * 0.15}s`;
+          typingDiv.appendChild(dot);
+        }
+
+        chatArea.appendChild(typingDiv);
+      }
+    }
+
+    setInterval(() => {
+      conversationStep = (conversationStep + 1) % 6;
+      updateChat();
+    }, 2500);
+
+    // Listening status toggle
+    setInterval(() => {
+      isListening = !isListening;
+
+      const statusDot = document.getElementById('statusDot');
+      const statusLabel = document.getElementById('statusLabel');
+      const voiceStatus = document.getElementById('voiceStatus');
+
+      if (statusDot) {
+        statusDot.style.background = isListening ? '#22C55E' : 'var(--muted)';
+        statusDot.style.animation = isListening ? 'pulse 1.5s ease infinite' : 'none';
+      }
+
+      if (statusLabel) {
+        statusLabel.textContent = isListening ? 'Listening...' : 'Processing...';
+        statusLabel.style.color = isListening ? '#22C55E' : 'var(--muted)';
+      }
+
+      if (voiceStatus) {
+        voiceStatus.textContent = isListening ? 'Tap to stop • Speaking in Hindi' : 'Tap to speak';
+      }
+
+      // Update sound bars
+      const soundBars = document.querySelectorAll('.sound-bar');
+      soundBars.forEach(bar => {
+        if (isListening) {
+          bar.classList.add('active');
+        } else {
+          bar.classList.remove('active');
+        }
+      });
+    }, 4000);
+
+    // Initialize sound wave
+    const soundWave = document.getElementById('soundWave');
+    if (soundWave) {
+      for (let i = 0; i < 20; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'sound-bar active';
+        const randomDuration = 0.4 + Math.random() * 0.3;
+        bar.style.animationDuration = `${randomDuration}s`;
+        bar.style.animationDelay = `${i * 0.05}s`;
+        soundWave.appendChild(bar);
+      }
+    }
+
+    // Initial chat render
+    updateChat();
+
+    // Initial step active state
+    const step0 = document.getElementById('step0');
+    if (step0) step0.classList.add('active');
+    const progressFill = document.getElementById('progressFill');
+    if (progressFill) progressFill.style.width = '25%';
+
+    // Feature helper text scroll detection and parallax
+    let currentActiveFeature = 0;
+
+    function updateFeatureHelperText() {
+      const featureCards = document.querySelectorAll('.feature-card');
+      const helperTextItems = document.querySelectorAll('.helper-text-item');
+      const featuresSection = document.getElementById('features');
+
+      if (featureCards.length === 0 || helperTextItems.length === 0) return;
+
+      const windowHeight = window.innerHeight;
+      let newActiveFeature = 0;
+      let closestDistance = Infinity;
+
+      // Find the feature card closest to center of viewport
+      featureCards.forEach((card, index) => {
+        const rect = card.getBoundingClientRect();
+        const cardCenter = rect.top + rect.height / 2;
+        const viewportCenter = windowHeight / 2;
+        const distance = Math.abs(cardCenter - viewportCenter);
+
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          newActiveFeature = index;
+        }
+      });
+
+      // Only update if changed
+      if (newActiveFeature !== currentActiveFeature) {
+        // Instantly remove active from current
+        helperTextItems[currentActiveFeature].classList.remove('active');
+        helperTextItems[currentActiveFeature].classList.add('exiting');
+
+        // Remove exiting class after animation
+        setTimeout(() => {
+          helperTextItems[currentActiveFeature].classList.remove('exiting');
+        }, 80);
+
+        // Instantly activate new one
+        helperTextItems[newActiveFeature].classList.add('active');
+
+        currentActiveFeature = newActiveFeature;
+      }
+
+      // Add parallax effect
+      if (featuresSection) {
+        const sectionRect = featuresSection.getBoundingClientRect();
+        const scrollProgress = Math.max(0, Math.min(1, (windowHeight - sectionRect.top) / windowHeight));
+
+        helperTextItems.forEach((item, index) => {
+          if (item.classList.contains('active')) {
+            const parallaxY = scrollProgress * -30;
+            item.style.transform = `translateZ(0) scale(1) translateY(${parallaxY}px)`;
+          }
+        });
+      }
+    }
+
+    // Use requestAnimationFrame for smooth parallax
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateFeatureHelperText();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
+    // Initial check
+    updateFeatureHelperText();
+  </script>
+</body>
+</html>
